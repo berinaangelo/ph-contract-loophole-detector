@@ -13,7 +13,7 @@ Full design rationale, primary flow, and scope decisions live in
 
 | Input | Loading | Results |
 |---|---|---|
-| ![Input screen](docs/screenshots/Screenshot%202026-08-20%20at%203.14.57%20PM.png) | ![Loading screen](docs/screenshots/Screenshot%202026-08-20%20at%203.15.06%20PM.png) | |
+| ![Input screen](docs/screenshots/01.png) | ![Loading screen](docs/screenshots/02.png) | |
 
 ## How it works
 
