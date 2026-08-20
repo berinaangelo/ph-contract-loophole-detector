@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PH Lease Contract Loophole Detector</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #d8d8d8;
+    --accent: #1f6feb;
+
+    --high-bg: #fdeceb;
+    --high-line: #c22b1f;
+    --high-ink: #7a1a12;
+
+    --medium-bg: #fdf3e3;
+    --medium-line: #b26a00;
+    --medium-ink: #7a4900;
+
+    --low-bg: #eef3fb;
+    --low-line: #3a5a8c;
+    --low-ink: #2a4266;
+
+    --good: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 0 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  main { max-width: 640px; margin: 0 auto; padding: 32px 20px 0; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card-shell {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--card-bg);
+    padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .app-title { font-weight: 700; font-size: 15px; margin-bottom: 14px; }
+  .disclaimer {
+    font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line); padding: 9px 0; margin-bottom: 18px; line-height: 1.5;
+  }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .hint { font-size: 12px; color: var(--muted); margin: -2px 0 10px; }
+  textarea {
+    width: 100%; min-height: 130px; border: 1px solid var(--line);
+    border-radius: 6px; padding: 12px; font: inherit; color: var(--ink);
+    resize: vertical; background: #fff;
+  }
+  .input-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .input-tabs button {
+    font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 6px 6px 0 0;
+    border: 1px solid var(--line); border-bottom: none; background: #f0f0f0; color: var(--muted);
+    cursor: pointer;
+  }
+  .input-tabs button.active { background: #fff; color: var(--ink); font-weight: 600; }
+  .hidden { display: none; }
+  .upload-box {
+    border: 2px dashed var(--line); border-radius: 8px; padding: 28px 16px;
+    text-align: center; color: var(--muted); font-size: 13px; background: #fbfbfb;
+    cursor: pointer;
+  }
+  .upload-box.drag-over { border-color: var(--accent); background: #f3f7fe; }
+  .upload-box strong { color: var(--ink); display: block; margin-bottom: 4px; font-size: 14px; }
+  .upload-box .filename { color: var(--accent); font-weight: 600; margin-top: 6px; }
+  .actions { text-align: right; margin-top: 16px; }
+  button.btn-primary {
+    font: inherit; border: none; border-radius: 6px; cursor: pointer;
+    background: var(--accent); color: #fff; padding: 11px 20px; font-weight: 600; font-size: 14px;
+  }
+  button.btn-primary:disabled { opacity: .55; cursor: default; }
+  button.btn-secondary {
+    font: inherit; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+    background: transparent; color: var(--accent); padding: 8px 14px; font-size: 13px;
+  }
+
+  .loading-line { font-size: 14.5px; margin-bottom: 8px; }
+  .loading-line.done { color: #1a7f37; }
+  .loading-line.active { color: var(--ink); font-weight: 600; }
+  .loading-line.pending { color: var(--muted); }
+  .loading-note { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+  .scorecard {
+    display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .scorecard .pill {
+    flex: 1; min-width: 84px; border-radius: 8px; padding: 10px 8px; text-align: center;
+  }
+  .scorecard .pill .n { font-size: 22px; font-weight: 800; line-height: 1; }
+  .scorecard .pill .label { font-size: 11px; font-weight: 700; letter-spacing: .03em; margin-top: 4px; }
+  .scorecard .pill.high { background: var(--high-bg); color: var(--high-ink); }
+  .scorecard .pill.medium { background: var(--medium-bg); color: var(--medium-ink); }
+  .scorecard .pill.low { background: var(--low-bg); color: var(--low-ink); }
+
+  .section-heading {
+    font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    margin: 22px 0 10px; color: var(--muted);
+  }
+  .section-heading:first-of-type { margin-top: 4px; }
+
+  .finding {
+    border: 1px solid var(--line); border-left-width: 5px; border-radius: 8px;
+    padding: 13px 15px; margin-bottom: 10px; background: #fff;
+  }
+  .finding.high { border-left-color: var(--high-line); }
+  .finding.medium { border-left-color: var(--medium-line); }
+  .finding.low { border-left-color: var(--low-line); }
+  /* Gap findings (missing-clause checks) are the same LOW color as
+     clause-specific LOW findings — the "Missing from your contract"
+     heading and the absent clause-quote already distinguish them
+     structurally; a second color code on top was redundant noise. */
+  .finding.gap { border-left-color: var(--low-line); }
+
+  .finding .badge {
+    display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .04em;
+    padding: 2px 7px; border-radius: 4px; margin-right: 8px; vertical-align: middle;
+  }
+  .finding.high .badge { background: var(--high-bg); color: var(--high-ink); }
+  .finding.medium .badge { background: var(--medium-bg); color: var(--medium-ink); }
+  .finding.low .badge,
+  .finding.gap .badge { background: var(--low-bg); color: var(--low-ink); }
+
+  .finding .issue { font-weight: 700; font-size: 14px; display: inline; vertical-align: middle; }
+  .finding .clause {
+    font-size: 13px; font-style: italic; color: #333; background: #f7f7f7;
+    border-radius: 6px; padding: 8px 10px; margin: 9px 0; border: 1px solid #ececec;
+  }
+  .finding .explanation { font-size: 13.5px; color: #2a2a2a; margin-bottom: 7px; }
+  .finding .meta-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+  /* Gap findings have no citation (a missing clause isn't tied to a
+     specific statute) — action-only, right-aligned to land in the same
+     visual spot the action sits in on every other card. */
+  .finding .meta-row.action-only { justify-content: flex-end; }
+  .finding .citation { color: var(--muted); }
+  .finding .action { color: var(--ink); font-weight: 600; }
+  .finding .action::before { content: "→ "; }
+
+  .clean-box, .msg-box { text-align: center; padding: 10px 4px 4px; }
+  .clean-box .icon, .msg-box .icon { font-size: 34px; margin-bottom: 10px; }
+  .clean-box .headline { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .clean-box p, .msg-box p { font-size: 13.5px; color: #333; margin: 0 0 14px; line-height: 1.6; }
+  /* "Looks clean" is a genuine good-news ending — give it its own
+     positive accent instead of the neutral ink the informational
+     no-match/error screens use. */
+  .clean-box .icon, .clean-box .headline { color: var(--good); }
+  .msg-box .headline { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+
+  .footer-actions { text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<main>
+
+  <!-- persistent disclaimer: renders on every screen, one copy, never
+       re-typed per state -->
+  <div class="card-shell" id="app-shell">
+    <div class="app-title">PH Lease Contract Loophole Detector</div>
+    <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+
+    <!-- 1. INPUT -->
+    <section class="screen active" id="screen-input">
+      <div class="input-tabs">
+        <button class="active" id="tab-paste" type="button">Paste text</button>
+        <button id="tab-upload" type="button">Upload file</button>
+      </div>
+
+      <div id="pane-paste">
+        <label for="contract-input">Paste your lease or rental contract</label>
+        <div class="hint">Paste the full lease, not just one clause, so missing-clause checks are accurate. (A single clause works fine too — you'll still get a real result for it.)</div>
+        <textarea id="contract-input" placeholder="e.g. CONTRACT OF LEASE&#10;&#10;This Contract of Lease is entered into by and between..."></textarea>
+      </div>
+
+      <div id="pane-upload" class="hidden">
+        <label>Upload a lease contract</label>
+        <div class="hint">DOCX or PDF (text-based). Scanned or photographed PDFs aren't supported yet — paste the text instead.</div>
+        <div class="upload-box" id="upload-box">
+          <strong>Drop a .docx or .pdf here</strong>
+          or click to browse
+          <div class="filename hidden" id="upload-filename"></div>
+        </div>
+        <input type="file" id="file-input" accept=".docx,.pdf" class="hidden">
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="analyze-btn">Analyze contract</button>
+      </div>
+    </section>
+
+    <!-- 2. LOADING -->
+    <section class="screen" id="screen-loading">
+      <div id="loading-line-1" class="loading-line active">● Checking for clearly illegal clauses</div>
+      <div id="loading-line-2" class="loading-line pending">○ Searching Philippine lease law</div>
+      <div id="loading-line-3" class="loading-line pending">○ Writing plain-language explanations</div>
+      <div class="loading-note">Every clause is checked before you see results — can take a while on local hardware for a long lease.</div>
+    </section>
+
+    <!-- 3. RESULTS: FINDINGS -->
+    <section class="screen" id="screen-results">
+      <div class="scorecard">
+        <div class="pill high"><div class="n" id="sc-high">0</div><div class="label">HIGH</div></div>
+        <div class="pill medium"><div class="n" id="sc-medium">0</div><div class="label">MEDIUM</div></div>
+        <div class="pill low"><div class="n" id="sc-low">0</div><div class="label">LOW</div></div>
+      </div>
+      <div id="results-body"></div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">New search</button></div>
+    </section>
+
+    <!-- 3b. RESULTS: LOOKS CLEAN -->
+    <section class="screen" id="screen-clean">
+      <div class="clean-box">
+        <div class="icon">✓</div>
+        <div class="headline">No issues found</div>
+        <p>This contract didn't trigger any known illegal clauses, one-sided terms, or missing-clause gaps. Still worth a lawyer's look before signing.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">New search</button></div>
+    </section>
+
+    <!-- 4a. NO MATCH: off-topic -->
+    <section class="screen" id="screen-nomatch-offtopic">
+      <div class="msg-box">
+        <div class="icon">🏠</div>
+        <div class="headline">This doesn't look like a lease contract</div>
+        <p>We couldn't find lease-shaped content (landlord, tenant, rent, lease terms) or anything matching a known issue in the text you submitted. Try pasting the full agreement, or a specific clause from it.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">Try again</button></div>
+    </section>
+
+    <!-- 4b. NO MATCH: unsupported language -->
+    <section class="screen" id="screen-nomatch-language">
+      <div class="msg-box">
+        <div class="icon">🌐</div>
+        <div class="headline">English text required</div>
+        <p>This tool currently supports English-language contract text only. Try pasting an English translation of the contract.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">Try again</button></div>
+    </section>
+
+    <!-- 5. FILE ERROR -->
+    <section class="screen" id="screen-file-error">
+      <div class="msg-box">
+        <div class="icon">⚠</div>
+        <div class="headline">We couldn't read this file</div>
+        <p>This usually means it's a scanned or photographed PDF with no selectable text, or an unsupported file type — that's not supported yet. Try uploading the original DOCX/PDF, or paste the contract text directly.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="paste-instead">Paste text instead</button></div>
+    </section>
+
+    <!-- 6. NETWORK/SERVER ERROR -->
+    <section class="screen" id="screen-network-error">
+      <div class="msg-box">
+        <div class="icon">⚠</div>
+        <div class="headline">Something went wrong</div>
+        <p>We couldn't reach the analysis service, or it hit an internal error. Make sure the server is running, then try again — your contract text is still filled in.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="try-again">Try again</button></div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(() => {
+  const screens = [
+    "input", "loading", "results", "clean",
+    "nomatch-offtopic", "nomatch-language", "file-error", "network-error",
+  ];
+  let loadingTimers = [];
+  let lastFormData = null;
+
+  function showScreen(name) {
+    screens.forEach(s => {
+      document.getElementById("screen-" + s).classList.toggle("active", s === name);
+    });
+  }
+
+  // ---- input tabs ----
+  const tabPaste = document.getElementById("tab-paste");
+  const tabUpload = document.getElementById("tab-upload");
+  const panePaste = document.getElementById("pane-paste");
+  const paneUpload = document.getElementById("pane-upload");
+  let activeTab = "paste";
+
+  function selectTab(tab) {
+    activeTab = tab;
+    tabPaste.classList.toggle("active", tab === "paste");
+    tabUpload.classList.toggle("active", tab === "upload");
+    panePaste.classList.toggle("hidden", tab !== "paste");
+    paneUpload.classList.toggle("hidden", tab !== "upload");
+  }
+  tabPaste.addEventListener("click", () => selectTab("paste"));
+  tabUpload.addEventListener("click", () => selectTab("upload"));
+
+  // ---- upload box ----
+  const uploadBox = document.getElementById("upload-box");
+  const fileInput = document.getElementById("file-input");
+  const uploadFilename = document.getElementById("upload-filename");
+
+  uploadBox.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", () => showSelectedFile());
+  ["dragover", "dragenter"].forEach(evt =>
+    uploadBox.addEventListener(evt, e => { e.preventDefault(); uploadBox.classList.add("drag-over"); })
+  );
+  ["dragleave", "dragend", "drop"].forEach(evt =>
+    uploadBox.addEventListener(evt, () => uploadBox.classList.remove("drag-over"))
+  );
+  uploadBox.addEventListener("drop", e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      showSelectedFile();
+    }
+  });
+  function showSelectedFile() {
+    const f = fileInput.files[0];
+    uploadFilename.textContent = f ? f.name : "";
+    uploadFilename.classList.toggle("hidden", !f);
+  }
+
+  // ---- loading stages (cosmetic — a legible wait past the Doherty
+  // threshold; not tied to real server progress, since the response is
+  // one synchronous call, not a streamed/staged protocol) ----
+  function resetLoadingLines() {
+    setLine(1, "active", "●"); setLine(2, "pending", "○"); setLine(3, "pending", "○");
+  }
+  function setLine(n, state, bullet) {
+    const el = document.getElementById("loading-line-" + n);
+    el.className = "loading-line " + state;
+    el.textContent = bullet + " " + [
+      "Checking for clearly illegal clauses",
+      "Searching Philippine lease law",
+      "Writing plain-language explanations",
+    ][n - 1];
+  }
+  function startLoadingStages() {
+    resetLoadingLines();
+    loadingTimers.push(setTimeout(() => { setLine(1, "done", "✓"); setLine(2, "active", "●"); }, 800));
+    loadingTimers.push(setTimeout(() => { setLine(2, "done", "✓"); setLine(3, "active", "●"); }, 2500));
+  }
+  function stopLoadingStages() { loadingTimers.forEach(clearTimeout); loadingTimers = []; }
+
+  // ---- rendering ----
+  function findingCard(f, isGap) {
+    const sevClass = isGap ? "gap" : f.severity.toLowerCase();
+    const card = document.createElement("div");
+    card.className = "finding " + sevClass;
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = f.severity;
+
+    const issue = document.createElement("span");
+    issue.className = "issue";
+    issue.textContent = f.issue;
+
+    card.append(badge, issue);
+
+    if (f.clauseText) {
+      const clause = document.createElement("div");
+      clause.className = "clause";
+      clause.textContent = "“" + f.clauseText + "”";
+      card.appendChild(clause);
+    }
+
+    const explanation = document.createElement("div");
+    explanation.className = "explanation";
+    explanation.textContent = f.explanation;
+    card.appendChild(explanation);
+
+    const metaRow = document.createElement("div");
+    metaRow.className = "meta-row" + (f.citation ? "" : " action-only");
+    if (f.citation) {
+      const citation = document.createElement("span");
+      citation.className = "citation";
+      citation.textContent = f.citation;
+      metaRow.appendChild(citation);
+    }
+    const action = document.createElement("span");
+    action.className = "action";
+    action.textContent = f.action;
+    metaRow.appendChild(action);
+    card.appendChild(metaRow);
+
+    return card;
+  }
+
+  function sectionHeading(text) {
+    const h = document.createElement("div");
+    h.className = "section-heading";
+    h.textContent = text;
+    return h;
+  }
+
+  function renderResults(data) {
+    document.getElementById("sc-high").textContent = data.scorecard?.high ?? 0;
+    document.getElementById("sc-medium").textContent = data.scorecard?.medium ?? 0;
+    document.getElementById("sc-low").textContent = data.scorecard?.low ?? 0;
+
+    const body = document.getElementById("results-body");
+    body.textContent = "";
+
+    const findings = data.findings || [];
+    const bySeverity = { HIGH: [], MEDIUM: [], LOW: [] };
+    findings.forEach(f => { (bySeverity[f.severity] || []).push(f); });
+
+    [["HIGH", "High severity"], ["MEDIUM", "Medium severity"], ["LOW", "Low severity"]].forEach(([sev, heading]) => {
+      const group = bySeverity[sev];
+      if (!group.length) return;
+      body.appendChild(sectionHeading(heading));
+      group.forEach(f => body.appendChild(findingCard(f, false)));
+    });
+
+    const gaps = data.gaps || [];
+    if (gaps.length) {
+      body.appendChild(sectionHeading("Missing from your contract"));
+      gaps.forEach(f => body.appendChild(findingCard(f, true)));
+    }
+  }
+
+  // ---- submit ----
+  function buildFormData() {
+    const fd = new FormData();
+    if (activeTab === "upload") {
+      const f = fileInput.files[0];
+      if (!f) return null;
+      fd.append("file", f);
+    } else {
+      const text = document.getElementById("contract-input").value.trim();
+      if (!text) return null;
+      fd.append("text", text);
+    }
+    return fd;
+  }
+
+  async function submitAnalysis(formData) {
+    lastFormData = formData;
+    showScreen("loading");
+    startLoadingStages();
+
+    let res;
+    try {
+      res = await fetch("/api/analyze", { method: "POST", body: formData });
+    } catch (e) {
+      stopLoadingStages();
+      showScreen("network-error");
+      return;
+    }
+    stopLoadingStages();
+
+    if (!res.ok) {
+      showScreen("network-error");
+      return;
+    }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      showScreen("network-error");
+      return;
+    }
+
+    switch (data.status) {
+      case "results":
+        renderResults(data);
+        showScreen("results");
+        break;
+      case "clean":
+        showScreen("clean");
+        break;
+      case "no_match_offtopic":
+        showScreen("nomatch-offtopic");
+        break;
+      case "no_match_language":
+        showScreen("nomatch-language");
+        break;
+      case "file_error":
+        showScreen("file-error");
+        break;
+      default:
+        showScreen("network-error");
+    }
+  }
+
+  document.getElementById("analyze-btn").addEventListener("click", () => {
+    const fd = buildFormData();
+    if (!fd) return;
+    submitAnalysis(fd);
+  });
+
+  document.querySelectorAll('[data-action="new-search"]').forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("contract-input").value = "";
+      fileInput.value = "";
+      showSelectedFile();
+      showScreen("input");
+    });
+  });
+  document.querySelector('[data-action="paste-instead"]').addEventListener("click", () => {
+    selectTab("paste");
+    showScreen("input");
+  });
+  document.querySelector('[data-action="try-again"]').addEventListener("click", () => {
+    if (lastFormData) submitAnalysis(lastFormData);
+  });
+
+  showScreen("input");
+})();
+</script>
+</body>
+</html>

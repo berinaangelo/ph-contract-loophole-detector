@@ -1,0 +1,15 @@
+/.ph-contract-loophole-detector
+/bin/
+*.exe
+*.test
+*.out
+/data/
+/snapshots/
+.qdrant-initialized
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/
+.idea/
+/.claude/

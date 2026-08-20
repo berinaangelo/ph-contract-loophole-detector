@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PH Lease Contract Loophole Detector — mockup</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #d8d8d8;
+    --accent: #1f6feb;
+
+    --high-bg: #fdeceb;
+    --high-line: #c22b1f;
+    --high-ink: #7a1a12;
+
+    --medium-bg: #fdf3e3;
+    --medium-line: #b26a00;
+    --medium-ink: #7a4900;
+
+    --low-bg: #eef3fb;
+    --low-line: #3a5a8c;
+    --low-ink: #2a4266;
+
+    --good: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 0 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  /* ---- mockup-only review nav — deliberately styled unlike product UI ---- */
+  #review-nav {
+    position: sticky; top: 0; z-index: 10;
+    background: #20242c; color: #cfd6e4;
+    font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; border-bottom: 2px dashed #55607a;
+  }
+  #review-nav .label { color: #8b95ad; letter-spacing: .04em; }
+  #review-nav button {
+    font: inherit; background: #2d3340; color: #cfd6e4; border: 1px solid #454e63;
+    border-radius: 4px; padding: 4px 9px; cursor: pointer;
+  }
+  #review-nav button.current { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #review-nav button:hover { border-color: #7a869c; }
+
+  main { max-width: 640px; margin: 0 auto; padding: 32px 20px 0; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card-shell {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--card-bg);
+    padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .app-title { font-weight: 700; font-size: 15px; margin-bottom: 14px; }
+  .disclaimer {
+    font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line); padding: 9px 0; margin-bottom: 18px; line-height: 1.5;
+  }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .hint { font-size: 12px; color: var(--muted); margin: -2px 0 10px; }
+  textarea {
+    width: 100%; min-height: 130px; border: 1px solid var(--line);
+    border-radius: 6px; padding: 12px; font: inherit; color: var(--ink);
+    resize: vertical; background: #fff;
+  }
+  .input-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .input-tabs button {
+    font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 6px 6px 0 0;
+    border: 1px solid var(--line); border-bottom: none; background: #f0f0f0; color: var(--muted);
+    cursor: pointer;
+  }
+  .input-tabs button.active { background: #fff; color: var(--ink); font-weight: 600; }
+  .upload-box {
+    border: 2px dashed var(--line); border-radius: 8px; padding: 28px 16px;
+    text-align: center; color: var(--muted); font-size: 13px; background: #fbfbfb;
+  }
+  .upload-box strong { color: var(--ink); display: block; margin-bottom: 4px; font-size: 14px; }
+  .actions { text-align: right; margin-top: 16px; }
+  button.btn-primary {
+    font: inherit; border: none; border-radius: 6px; cursor: pointer;
+    background: var(--accent); color: #fff; padding: 11px 20px; font-weight: 600; font-size: 14px;
+  }
+  button.btn-secondary {
+    font: inherit; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+    background: transparent; color: var(--accent); padding: 8px 14px; font-size: 13px;
+  }
+
+  .loading-line { font-size: 14.5px; margin-bottom: 8px; }
+  .loading-line.done { color: #1a7f37; }
+  .loading-line.active { color: var(--ink); font-weight: 600; }
+  .loading-line.pending { color: var(--muted); }
+  .loading-note { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+  .scorecard {
+    display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .scorecard .pill {
+    flex: 1; min-width: 84px; border-radius: 8px; padding: 10px 8px; text-align: center;
+  }
+  .scorecard .pill .n { font-size: 22px; font-weight: 800; line-height: 1; }
+  .scorecard .pill .label { font-size: 11px; font-weight: 700; letter-spacing: .03em; margin-top: 4px; }
+  .scorecard .pill.high { background: var(--high-bg); color: var(--high-ink); }
+  .scorecard .pill.medium { background: var(--medium-bg); color: var(--medium-ink); }
+  .scorecard .pill.low { background: var(--low-bg); color: var(--low-ink); }
+
+  .section-heading {
+    font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    margin: 22px 0 10px; color: var(--muted);
+  }
+  .section-heading:first-of-type { margin-top: 4px; }
+
+  .finding {
+    border: 1px solid var(--line); border-left-width: 5px; border-radius: 8px;
+    padding: 13px 15px; margin-bottom: 10px; background: #fff;
+  }
+  .finding.high { border-left-color: var(--high-line); }
+  .finding.medium { border-left-color: var(--medium-line); }
+  .finding.low { border-left-color: var(--low-line); }
+  /* Gap findings (missing-clause checks) are the same LOW color as
+     clause-specific LOW findings — the "Missing from your contract"
+     heading and the absent clause-quote already distinguish them
+     structurally; a second color code on top was redundant noise. */
+  .finding.gap { border-left-color: var(--low-line); }
+
+  .finding .badge {
+    display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .04em;
+    padding: 2px 7px; border-radius: 4px; margin-right: 8px; vertical-align: middle;
+  }
+  .finding.high .badge { background: var(--high-bg); color: var(--high-ink); }
+  .finding.medium .badge { background: var(--medium-bg); color: var(--medium-ink); }
+  .finding.low .badge,
+  .finding.gap .badge { background: var(--low-bg); color: var(--low-ink); }
+
+  .finding .issue { font-weight: 700; font-size: 14px; display: inline; vertical-align: middle; }
+  .finding .clause {
+    font-size: 13px; font-style: italic; color: #333; background: #f7f7f7;
+    border-radius: 6px; padding: 8px 10px; margin: 9px 0; border: 1px solid #ececec;
+  }
+  .finding .explanation { font-size: 13.5px; color: #2a2a2a; margin-bottom: 7px; }
+  .finding .meta-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+  /* Gap findings have no citation (a missing clause isn't tied to a
+     specific statute) — action-only, right-aligned to land in the same
+     visual spot the action sits in on every other card, instead of an
+     empty citation cell implying something belongs there. */
+  .finding .meta-row.action-only { justify-content: flex-end; }
+  .finding .citation { color: var(--muted); }
+  .finding .action { color: var(--ink); font-weight: 600; }
+  .finding .action::before { content: "→ "; }
+
+  .clean-box, .msg-box { text-align: center; padding: 10px 4px 4px; }
+  .clean-box .icon, .msg-box .icon { font-size: 34px; margin-bottom: 10px; }
+  .clean-box .headline { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .clean-box p, .msg-box p { font-size: 13.5px; color: #333; margin: 0 0 14px; line-height: 1.6; }
+  /* "Looks clean" is a genuine good-news ending (Peak-End Rule) — give it
+     its own positive accent instead of the same neutral ink as the
+     no-match/error screens, which are informational, not good news. */
+  .clean-box .icon, .clean-box .headline { color: var(--good); }
+  .msg-box .headline { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .msg-box textarea { margin-top: 10px; }
+
+  .footer-actions { text-align: center; margin-top: 20px; }
+
+  .annotation {
+    max-width: 640px; margin: 10px auto 0; padding: 0 20px;
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+  }
+  .annotation b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav id="review-nav">
+  <span class="label">MOCKUP REVIEW — jump to screen:</span>
+  <button data-screen="input">1. Input</button>
+  <button data-screen="loading">2. Loading</button>
+  <button data-screen="results">3. Results (findings)</button>
+  <button data-screen="clean">3b. Results (looks clean)</button>
+  <button data-screen="nomatch">4. No match</button>
+  <button data-screen="error">5. File error</button>
+</nav>
+
+<main>
+
+  <!-- 1. INPUT -->
+  <section class="screen" id="screen-input">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+
+      <div class="input-tabs">
+        <button class="active" id="tab-paste">Paste text</button>
+        <button id="tab-upload">Upload file</button>
+      </div>
+
+      <div id="pane-paste">
+        <label for="contract-input">Paste your lease or rental contract</label>
+        <div class="hint">Paste the full lease, not just one clause, so missing-clause checks are accurate. (A single clause works fine too — you'll still get a real result for it.)</div>
+        <textarea id="contract-input" placeholder="e.g. CONTRACT OF LEASE&#10;&#10;This Contract of Lease is entered into by and between...">In case of default, the Landlord may enter the premises, change the locks, and remove the Tenant's belongings without need of a court order.
+
+The Tenant shall pay six (6) months advance rent upon signing this Contract of Lease.
+
+Upon renewal, the monthly rent shall be adjusted to the prevailing market rate as determined by the Lessor.
+
+Any violation of this Contract by the Tenant, however minor, shall be grounds for immediate termination without prior notice.
+
+Tenant shall pay a fixed monthly utility fee of Php 1,500 in addition to rent.</textarea>
+      </div>
+
+      <div id="pane-upload" class="hidden">
+        <label>Upload a lease contract</label>
+        <div class="hint">DOCX or PDF (text-based). Scanned or photographed PDFs aren't supported yet — paste the text instead.</div>
+        <div class="upload-box">
+          <strong>Drop a .docx or .pdf here</strong>
+          or click to browse
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="analyze-btn">Analyze contract</button>
+      </div>
+    </div>
+  </section>
+  <p class="annotation" data-for="input"></p>
+
+  <!-- 2. LOADING -->
+  <section class="screen" id="screen-loading">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div id="loading-line-1" class="loading-line active">● Checking for clearly illegal clauses</div>
+      <div id="loading-line-2" class="loading-line pending">○ Searching Philippine lease law</div>
+      <div id="loading-line-3" class="loading-line pending">○ Writing plain-language explanations</div>
+      <div class="loading-note">A few seconds on local hardware — every clause is checked before you see results.</div>
+    </div>
+  </section>
+  <p class="annotation" data-for="loading"></p>
+
+  <!-- 3. RESULTS: FINDINGS -->
+  <section class="screen" id="screen-results">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+
+      <div class="scorecard">
+        <div class="pill high"><div class="n">2</div><div class="label">HIGH</div></div>
+        <div class="pill medium"><div class="n">2</div><div class="label">MEDIUM</div></div>
+        <div class="pill low"><div class="n">4</div><div class="label">LOW</div></div>
+      </div>
+
+      <div class="section-heading">High severity</div>
+
+      <div class="finding high">
+        <span class="badge">HIGH</span><span class="issue">Self-help eviction / lockout clause</span>
+        <div class="clause">"In case of default, the Landlord may enter the premises, change the locks, and remove the Tenant's belongings without need of a court order."</div>
+        <div class="explanation">A landlord cannot lawfully retake possession by self-help — locking out a tenant or removing belongings without a court order. Eviction requires a judicial ejectment (unlawful detainer) action even if the tenant is in default.</div>
+        <div class="meta-row">
+          <span class="citation">Civil Code, Art. 536; Rules of Court, Rule 70</span>
+          <span class="action">Do not sign as-is; request this clause be removed or revised to reference the judicial eviction process.</span>
+        </div>
+      </div>
+
+      <div class="finding high">
+        <span class="badge">HIGH</span><span class="issue">Advance rent exceeds Rent Control Act cap</span>
+        <div class="clause">"The Tenant shall pay six (6) months advance rent upon signing this Contract of Lease."</div>
+        <div class="explanation">This clause requires 6 months advance rent. For units covered by the Rent Control Act, advance rent is capped at 1 month.</div>
+        <div class="meta-row">
+          <span class="citation">RA 9653 (Rent Control Act), Sec. 5</span>
+          <span class="action">Confirm whether this unit is rent-control covered; if so, renegotiate this term.</span>
+        </div>
+      </div>
+
+      <div class="section-heading">Medium severity</div>
+
+      <div class="finding medium">
+        <span class="badge">MEDIUM</span><span class="issue">Rent increase tied to undefined "market rate"</span>
+        <div class="clause">"Upon renewal, the monthly rent shall be adjusted to the prevailing market rate as determined by the Lessor."</div>
+        <div class="explanation">Legal for units outside rent-control coverage, but gives the tenant no defined formula or ceiling to budget for or dispute the new rent.</div>
+        <div class="meta-row">
+          <span class="citation">Civil Code, Arts. 19, 1306</span>
+          <span class="action">Ask for a defined formula or percentage cap instead of an open-ended "market rate."</span>
+        </div>
+      </div>
+
+      <div class="finding medium">
+        <span class="badge">MEDIUM</span><span class="issue">Any minor violation triggers immediate termination</span>
+        <div class="clause">"Any violation of this Contract by the Tenant, however minor, shall be grounds for immediate termination without prior notice."</div>
+        <div class="explanation">Legal to write, but leaves no chance to fix an honest mistake before losing housing — worth negotiating down to a defined cure period.</div>
+        <div class="meta-row">
+          <span class="citation">Civil Code, Arts. 19, 24, 1306</span>
+          <span class="action">Negotiate a notice-and-cure period (e.g. 5-7 days) before termination applies.</span>
+        </div>
+      </div>
+
+      <div class="section-heading">Low severity</div>
+
+      <div class="finding low">
+        <span class="badge">LOW</span><span class="issue">Flat utility fee with no link to consumption</span>
+        <div class="clause">"Tenant shall pay a fixed monthly utility fee of Php 1,500 in addition to rent."</div>
+        <div class="explanation">Legal to write, but removes the tenant's ability to verify they're being charged fairly against actual usage.</div>
+        <div class="meta-row">
+          <span class="citation">Civil Code, Arts. 19, 1306</span>
+          <span class="action">Ask whether this can be tied to metered consumption instead of a flat fee.</span>
+        </div>
+      </div>
+
+      <div class="section-heading">Missing from your contract</div>
+
+      <div class="finding gap">
+        <span class="badge">LOW</span><span class="issue">Dispute resolution / venue</span>
+        <div class="explanation">The contract doesn't appear to specify how disputes between the parties will be resolved.</div>
+        <div class="meta-row action-only">
+          <span class="action">Consider adding a dispute-resolution clause (e.g. barangay conciliation, then venue).</span>
+        </div>
+      </div>
+
+      <div class="finding gap">
+        <span class="badge">LOW</span><span class="issue">Subletting / assignment policy</span>
+        <div class="explanation">The contract doesn't appear to state whether subletting or assigning the lease is allowed.</div>
+        <div class="meta-row action-only">
+          <span class="action">Consider adding a clause explicitly allowing or prohibiting subletting/assignment.</span>
+        </div>
+      </div>
+
+      <div class="finding gap">
+        <span class="badge">LOW</span><span class="issue">House rules / property use restrictions</span>
+        <div class="explanation">The contract doesn't appear to reference house rules or restrictions on use of the premises.</div>
+        <div class="meta-row action-only">
+          <span class="action">Consider adding or attaching house rules covering pets, noise, guests, and permitted use.</span>
+        </div>
+      </div>
+
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">New search</button></div>
+    </div>
+  </section>
+  <p class="annotation" data-for="results"></p>
+
+  <!-- 3b. RESULTS: LOOKS CLEAN -->
+  <section class="screen" id="screen-clean">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+
+      <div class="scorecard">
+        <div class="pill high"><div class="n">0</div><div class="label">HIGH</div></div>
+        <div class="pill medium"><div class="n">0</div><div class="label">MEDIUM</div></div>
+        <div class="pill low"><div class="n">0</div><div class="label">LOW</div></div>
+      </div>
+
+      <div class="clean-box">
+        <div class="icon">✓</div>
+        <div class="headline">No issues found</div>
+        <p>This contract didn't trigger any known illegal clauses, one-sided terms, or missing-clause gaps. Still worth a lawyer's look before signing.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">New search</button></div>
+    </div>
+  </section>
+  <p class="annotation" data-for="clean"></p>
+
+  <!-- 4. NO MATCH -->
+  <section class="screen" id="screen-nomatch">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+      <div class="msg-box">
+        <div class="icon">🏠</div>
+        <div class="headline">This doesn't look like a lease contract</div>
+        <p>We couldn't find lease-shaped content (landlord, tenant, rent, lease terms) or anything matching a known issue in the text you submitted. Try pasting the full agreement, or a specific clause from it.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">Try again</button></div>
+    </div>
+  </section>
+  <p class="annotation" data-for="nomatch"></p>
+
+  <!-- 5. FILE ERROR -->
+  <section class="screen" id="screen-error">
+    <div class="card-shell">
+      <div class="app-title">PH Lease Contract Loophole Detector</div>
+      <div class="disclaimer">Educational research tool, not legal advice. Findings — especially HIGH severity — should be confirmed with a licensed Philippine lawyer before you sign or act on them.</div>
+      <div class="msg-box">
+        <div class="icon">⚠</div>
+        <div class="headline">We couldn't read this file</div>
+        <p>This usually means it's a scanned or photographed PDF with no selectable text — that's not supported yet. Try uploading the original DOCX/PDF, or paste the contract text directly.</p>
+      </div>
+      <div class="footer-actions"><button class="btn-secondary" data-action="new-search">Paste text instead</button></div>
+    </div>
+  </section>
+  <p class="annotation" data-for="error"></p>
+
+</main>
+
+<script>
+(() => {
+  const screens = ["input", "loading", "results", "clean", "nomatch", "error"];
+  const navButtons = document.querySelectorAll("#review-nav button");
+  let loadingTimers = [];
+
+  const annotations = {
+    input: "<b>Demonstrates:</b> disclaimer on every screen (incl. input), placeholder guidance to paste the full lease, tabbed paste/upload with an explicit \"scanned PDFs not supported\" note.",
+    loading: "<b>Demonstrates:</b> staged, legible wait (Doherty threshold) instead of a blank spinner — mirrors the pipeline's real stages (deterministic check → retrieval → generation).",
+    results: "<b>Demonstrates:</b> scorecard-first, fixed HIGH→MEDIUM→LOW ordering, quoted clause text on every clause-specific finding, and clause-specific LOW visually separated from checklist \"missing from your contract\" gaps (dashed border, no quoted clause — there isn't one).",
+    clean: "<b>Demonstrates:</b> the 0/0/0 \"looks clean\" state — a distinct, reassuring result, not the same screen as an error.",
+    nomatch: "<b>Demonstrates:</b> the no-match state, reserved for text with no lease-shaped content and no matching issue at all — not shown just because one section didn't run.",
+    error: "<b>Demonstrates:</b> the file-extraction failure state — an honest \"couldn't read this\" instead of silently analyzing nothing.",
+  };
+  document.querySelectorAll(".annotation").forEach(el => {
+    el.innerHTML = annotations[el.dataset.for];
+  });
+
+  function showScreen(name) {
+    screens.forEach(s => {
+      document.getElementById("screen-" + s).classList.toggle("active", s === name);
+    });
+    document.querySelectorAll(".annotation").forEach(el => {
+      el.style.display = el.dataset.for === name ? "block" : "none";
+    });
+    navButtons.forEach(b => b.classList.toggle("current", b.dataset.screen === name));
+  }
+
+  navButtons.forEach(b => b.addEventListener("click", () => {
+    stopLoadingStages();
+    showScreen(b.dataset.screen);
+  }));
+
+  document.getElementById("tab-paste").addEventListener("click", () => {
+    document.getElementById("tab-paste").classList.add("active");
+    document.getElementById("tab-upload").classList.remove("active");
+    document.getElementById("pane-paste").classList.remove("hidden");
+    document.getElementById("pane-upload").classList.add("hidden");
+  });
+  document.getElementById("tab-upload").addEventListener("click", () => {
+    document.getElementById("tab-upload").classList.add("active");
+    document.getElementById("tab-paste").classList.remove("active");
+    document.getElementById("pane-upload").classList.remove("hidden");
+    document.getElementById("pane-paste").classList.add("hidden");
+  });
+
+  function resetLoadingLines() {
+    setLine(1, "active", "●"); setLine(2, "pending", "○"); setLine(3, "pending", "○");
+  }
+  function setLine(n, state, bullet) {
+    const el = document.getElementById("loading-line-" + n);
+    el.className = "loading-line " + state;
+    el.textContent = bullet + " " + [
+      "Checking for clearly illegal clauses",
+      "Searching Philippine lease law",
+      "Writing plain-language explanations",
+    ][n - 1];
+  }
+  function stopLoadingStages() { loadingTimers.forEach(clearTimeout); loadingTimers = []; }
+
+  document.getElementById("analyze-btn").addEventListener("click", () => {
+    showScreen("loading");
+    resetLoadingLines();
+    loadingTimers.push(setTimeout(() => { setLine(1, "done", "✓"); setLine(2, "active", "●"); }, 600));
+    loadingTimers.push(setTimeout(() => { setLine(2, "done", "✓"); setLine(3, "active", "●"); }, 1500));
+    loadingTimers.push(setTimeout(() => { setLine(3, "done", "✓"); showScreen("results"); }, 2400));
+  });
+
+  document.querySelectorAll('[data-action="new-search"]').forEach(btn => {
+    btn.addEventListener("click", () => showScreen("input"));
+  });
+
+  showScreen("input");
+})();
+</script>
+</body>
+</html>
