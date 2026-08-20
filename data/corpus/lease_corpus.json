@@ -1,0 +1,186 @@
+[
+  {
+    "id": "civil_code_1654",
+    "title": "Lessor's obligation to repair and deliver a fit dwelling",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1654",
+    "issue_tags": ["repairs_habitability"],
+    "text": "The lessor is obliged to deliver the property in a condition fit for its intended use, to make all necessary repairs during the lease to keep it fit for that use (unless the contract validly says otherwise), and to maintain the lessee in peaceful and adequate enjoyment of the lease for its entire duration."
+  },
+  {
+    "id": "civil_code_1658",
+    "title": "Tenant may withhold rent if lessor fails to repair or protect enjoyment",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1658",
+    "issue_tags": ["repairs_habitability"],
+    "text": "The lessee may suspend payment of rent if the lessor fails to make necessary repairs, or fails to maintain the lessee in peaceful and adequate enjoyment of the property, for as long as that failure continues."
+  },
+  {
+    "id": "clause_pattern_repair_cost_shift",
+    "title": "Tenant billed for repairs regardless of who caused the damage",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 24, 1654",
+    "issue_tags": ["repairs_habitability"],
+    "text": "A clause making the tenant pay for all repairs above a token amount, without distinguishing tenant-caused damage from normal wear or structural issues, is legal to write but shifts a cost the law otherwise assigns to the landlord onto the more disadvantaged party — the kind of imbalance Art. 24 asks courts to watch for."
+  },
+  {
+    "id": "civil_code_536_rule70",
+    "title": "A landlord cannot retake possession by force — only through court",
+    "source": "rules_of_court",
+    "citation": "Civil Code, Art. 536; Rules of Court, Rule 70",
+    "issue_tags": ["eviction_process"],
+    "text": "Possession of leased property may not be recovered by force, intimidation, or self-help (changing locks, cutting utilities, removing belongings) even against a tenant in default. A landlord who wants a tenant out must file an unlawful detainer action in the Municipal Trial Court where the property is located, under Rule 70 of the Rules of Court."
+  },
+  {
+    "id": "ra9653_sec7_grounds",
+    "title": "Judicial grounds for ejecting a tenant under the Rent Control Act",
+    "source": "ra9653",
+    "citation": "RA 9653 (Rent Control Act), Sec. 7",
+    "issue_tags": ["eviction_process", "termination_notice"],
+    "text": "For units covered by the Rent Control Act, valid grounds for judicial ejectment include: subletting/assignment without the owner's consent, the owner's legitimate need to repossess the unit for personal or immediate family use, the owner's need to demolish or make necessary repairs, expiration of the lease period, and the tenant's failure to pay rent or deposit for three (3) months. Ejectment still requires filing a court case — it is not self-executing."
+  },
+  {
+    "id": "clause_pattern_short_cure_period",
+    "title": "Any minor violation triggers immediate termination",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 24, 1306",
+    "issue_tags": ["eviction_process", "termination_notice"],
+    "text": "A clause allowing the landlord to terminate immediately for any violation \"however minor,\" with no notice-and-cure period, is legal to write but leaves the tenant no chance to fix an honest mistake (a late utility reimbursement, a minor house-rule slip) before losing housing — a lopsidedness worth negotiating down to a defined cure period."
+  },
+  {
+    "id": "ra9653_sec5_deposit",
+    "title": "Advance rent and deposit caps under the Rent Control Act",
+    "source": "ra9653",
+    "citation": "RA 9653 (Rent Control Act), Sec. 5",
+    "issue_tags": ["security_deposit"],
+    "text": "For units covered by the Rent Control Act, a lessor may not demand more than one (1) month advance rent and two (2) months deposit for the initial lease. The deposit must answer only for unpaid rent, utility bills, and damage, with any unused balance refunded to the tenant upon lease termination. (Coverage is limited to units under a monthly-rent ceiling that is periodically adjusted by DHSUD issuance — verify current coverage before relying on the cap for a specific unit.)"
+  },
+  {
+    "id": "clause_pattern_deposit_any_claim",
+    "title": "Deposit forfeitable for any claim landlord alleges, no itemization required",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 24",
+    "issue_tags": ["security_deposit"],
+    "text": "A clause letting the landlord keep the deposit against any claim they assert, without an itemized accounting the tenant can review or dispute, is legal to write but removes the tenant's practical ability to contest an inflated or invented deduction."
+  },
+  {
+    "id": "ra9653_sec4_increase",
+    "title": "Annual rent increase cap under the Rent Control Act",
+    "source": "ra9653",
+    "citation": "RA 9653 (Rent Control Act), Sec. 4",
+    "issue_tags": ["rent_increase"],
+    "text": "For units covered by the Rent Control Act, the annual increase in rent may not exceed seven percent (7%), provided the tenant is not in arrears. (Coverage depends on a monthly-rent ceiling periodically adjusted by DHSUD issuance — verify current coverage before relying on the cap for a specific unit.)"
+  },
+  {
+    "id": "clause_pattern_vague_market_rate",
+    "title": "Rent increase tied to undefined \"market rate\" with no formula or cap",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 1306",
+    "issue_tags": ["rent_increase"],
+    "text": "A clause allowing the landlord to raise rent to \"prevailing market rate\" at renewal, without a defined formula, ceiling, or reference point, is legal for units outside rent-control coverage but gives the tenant no way to budget for or dispute the new figure in advance."
+  },
+  {
+    "id": "civil_code_1229",
+    "title": "Courts may reduce an unconscionable penalty or interest rate",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1229",
+    "issue_tags": ["penalty_interest"],
+    "text": "A judge may equitably reduce a penalty when the principal obligation has been partly or irregularly complied with, and even reduce a penalty that is iniquitous or unconscionable, regardless of whether the obligation was fully breached."
+  },
+  {
+    "id": "clause_pattern_compounding_penalty",
+    "title": "Compounding daily penalty that stacks aggressively over time",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Art. 1229",
+    "issue_tags": ["penalty_interest"],
+    "text": "A penalty clause that compounds daily (each day's penalty added to a growing base rather than a flat rate on the original unpaid amount) can balloon a small missed payment into a large debt quickly — courts have repeatedly cut back penalty structures like this as unconscionable even where no single day's rate looks extreme on its own."
+  },
+  {
+    "id": "civil_code_1687",
+    "title": "Default lease period when the contract doesn't fix one",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1687",
+    "issue_tags": ["renewal_terms", "termination_notice"],
+    "text": "If a lease has no fixed period, it is understood to run from month to month if rent is paid monthly (or by the applicable interval for other payment periods) — either party may then end the lease by giving notice at least one period in advance, per the courts' equitable discretion."
+  },
+  {
+    "id": "civil_code_1670",
+    "title": "Implied renewal (tacita reconduccion) if the tenant stays with the landlord's consent",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1670",
+    "issue_tags": ["renewal_terms"],
+    "text": "If, at the end of the lease, the tenant continues enjoying the property for fifteen days with the landlord's acquiescence and without notice to the contrary from either side, an implied new lease arises — on the same terms as the original except duration, which reverts to the default periods under Art. 1682/1687."
+  },
+  {
+    "id": "clause_pattern_evergreen_renewal",
+    "title": "Automatic renewal unless tenant gives long advance notice, with a penalty for missing it",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 1306",
+    "issue_tags": ["renewal_terms"],
+    "text": "A clause that auto-renews the lease for another full term unless the tenant gives 90+ days' notice, backed by a penalty if they miss that window, is legal to write but functions as a trap for a tenant who simply forgets — worth negotiating to a shorter, more typical notice period (30 days is common) with no penalty for opting out."
+  },
+  {
+    "id": "civil_code_19_24",
+    "title": "Good faith in dealings, and court vigilance for the disadvantaged party",
+    "source": "civil_code",
+    "citation": "Civil Code, Arts. 19, 24",
+    "issue_tags": ["dispute_resolution_venue", "house_rules_use_restrictions"],
+    "text": "Every person must, in the exercise of rights and performance of duties, act with justice, give everyone their due, and observe honesty and good faith. In all contractual relations, courts must be vigilant to protect the party at a disadvantage due to ignorance, lack of bargaining power, or a similar handicap."
+  },
+  {
+    "id": "clause_pattern_forced_arbitration_cost",
+    "title": "Mandatory arbitration with tenant bearing fees regardless of outcome",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 24",
+    "issue_tags": ["dispute_resolution_venue"],
+    "text": "A clause requiring all disputes go to private arbitration, with the tenant responsible for arbitration fees win or lose, is legal to write but can price an ordinary tenant out of ever raising a legitimate complaint."
+  },
+  {
+    "id": "rule70_venue",
+    "title": "Ejectment cases must be filed where the property is located",
+    "source": "rules_of_court",
+    "citation": "Rules of Court, Rule 70, Sec. 1",
+    "issue_tags": ["dispute_resolution_venue"],
+    "text": "An action for forcible entry or unlawful detainer must be filed in the Municipal Trial Court of the city or municipality where the leased property is located — a contract clause fixing a different, distant venue for this type of case is generally unenforceable."
+  },
+  {
+    "id": "civil_code_1657",
+    "title": "Tenant's own obligations under a lease",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1657",
+    "issue_tags": ["utilities", "house_rules_use_restrictions"],
+    "text": "The lessee is obliged to pay the price of the lease as agreed, to use the property as a diligent head of a family would (devoting it only to the use stipulated, or the use implied from its nature), and to notify the lessor promptly of any usurpation or serious harm to the property."
+  },
+  {
+    "id": "clause_pattern_flat_utility_fee",
+    "title": "Flat \"utility fee\" with no link to actual consumption or right to audit",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 1306",
+    "issue_tags": ["utilities"],
+    "text": "A clause charging a fixed monthly \"utility fee\" untied to actual metered consumption, with no mechanism for the tenant to see or dispute the underlying bill, is legal to write but removes the tenant's ability to verify they're being charged fairly."
+  },
+  {
+    "id": "clause_pattern_blanket_sublet_ban",
+    "title": "Absolute ban on subletting with no hardship exception",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Art. 1306; RA 9653, Sec. 7",
+    "issue_tags": ["subletting_assignment"],
+    "text": "A clause absolutely prohibiting subletting or assignment under any circumstance, with no process for the tenant to request the landlord's consent (e.g. for a temporary relocation), is legal — subletting without consent is itself a recognized ground for ejectment under the Rent Control Act — but a total, no-exception ban is stricter than most standard leases and worth flagging before signing."
+  },
+  {
+    "id": "clause_pattern_unilateral_house_rules",
+    "title": "Landlord may change house rules unilaterally at any time",
+    "source": "clause_pattern",
+    "citation": "Civil Code, Arts. 19, 1306, 1159",
+    "issue_tags": ["house_rules_use_restrictions"],
+    "text": "A clause letting the landlord amend house rules at any time without the tenant's consent or advance notice turns a fixed agreement into one the landlord can effectively rewrite unilaterally — obligations arising from a contract should have the force of law between the parties as originally agreed, not be alterable by one side alone."
+  },
+  {
+    "id": "civil_code_1306",
+    "title": "Freedom to contract is limited by law, morals, and public policy",
+    "source": "civil_code",
+    "citation": "Civil Code, Art. 1306",
+    "issue_tags": ["security_deposit", "eviction_process", "repairs_habitability", "rent_increase", "penalty_interest", "termination_notice", "renewal_terms", "dispute_resolution_venue", "utilities", "subletting_assignment", "house_rules_use_restrictions"],
+    "text": "Contracting parties may establish whatever stipulations, clauses, terms, and conditions they deem convenient, provided these are not contrary to law, morals, good customs, public order, or public policy."
+  }
+]

@@ -3,7 +3,7 @@
 *.exe
 *.test
 *.out
-/data/
+/data/bleve
 /snapshots/
 .qdrant-initialized
 .env

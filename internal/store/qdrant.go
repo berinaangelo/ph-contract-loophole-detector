@@ -50,6 +50,24 @@ func (s *QdrantStore) EnsureCollection(ctx context.Context, vectorSize uint64) e
 	return nil
 }
 
+// DropCollection deletes QdrantCollection if it exists — a no-op
+// otherwise, same exists-check idiom as EnsureCollection. Paired with it
+// for cmd/ingest's -fresh flag: a genuine clean-slate re-ingest instead
+// of upserting into whatever's already there.
+func (s *QdrantStore) DropCollection(ctx context.Context) error {
+	exists, err := s.client.CollectionExists(ctx, QdrantCollection)
+	if err != nil {
+		return fmt.Errorf("qdrant: check collection: %w", err)
+	}
+	if !exists {
+		return nil
+	}
+	if err := s.client.DeleteCollection(ctx, QdrantCollection); err != nil {
+		return fmt.Errorf("qdrant: delete collection: %w", err)
+	}
+	return nil
+}
+
 // Upsert writes one Chunk's embedding + payload. The point ID is derived
 // deterministically from chunk.ID (see QdrantID), so re-ingesting the
 // same logical chunk overwrites it instead of duplicating it.
