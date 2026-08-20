@@ -1,5 +1,5 @@
 // Package generate is the RAG+LLM tier's second half (PLAN.md Primary
-// flow step 4): one or a few structured-output Ollama calls that turn
+// flow step 4): one or a few structured-output LLM calls that turn
 // internal/retrieve's per-clause candidates into MEDIUM/LOW findings, each
 // with a short plain-language explanation and a suggested action. The
 // LLM's only job is those two lines — the excerpt, citation, and clause
@@ -12,6 +12,11 @@
 // exceed one structured-output call's safe size on a 7B local model, so
 // Answer chunks them into capped, sequential batches instead of one call
 // per clause or one unbounded call per contract.
+//
+// Generation runs against a Provider — either OllamaProvider (local,
+// default) or ClaudeProvider (remote, opt-in via cmd/server's
+// -llm-provider flag) — so the batching/prompt/schema/assembly logic in
+// this file never needs to know which backend answered it.
 package generate
 
 import (
@@ -20,13 +25,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ollama/ollama/api"
-
 	"ph-contract-loophole-detector/internal/store"
 )
 
-// Model is the generation model PLAN.md's defaults settled on.
-const Model = "qwen2.5:7b"
+// Provider is the seam between this file's provider-agnostic batching
+// logic and a specific LLM backend's request/response shape. Batch sends
+// one structured-output request for systemPrompt + prompt, constrained by
+// schema (built by buildSchema), and returns the raw JSON response text
+// for findingsResponse to unmarshal — the same contract every provider
+// must satisfy regardless of how it talks to its backend.
+type Provider interface {
+	Batch(ctx context.Context, systemPrompt, prompt string, schema json.RawMessage) (string, error)
+}
 
 // BatchCap is the most candidates sent in one structured-output call —
 // PLAN.md Design decisions' starting cap, verified live against Model at
@@ -92,14 +102,14 @@ type Finding struct {
 // per clause or per candidate). If candidates is empty, it returns (nil,
 // nil) without calling the LLM at all — same instinct as not calling a
 // model with nothing grounded to hand it.
-func Answer(ctx context.Context, ollama *api.Client, candidates []Candidate) ([]Finding, error) {
+func Answer(ctx context.Context, provider Provider, candidates []Candidate) ([]Finding, error) {
 	if len(candidates) == 0 {
 		return nil, nil
 	}
 
 	var findings []Finding
 	for _, group := range chunkCandidates(candidates, BatchCap) {
-		batchFindings, err := batch(ctx, ollama, group)
+		batchFindings, err := batch(ctx, provider, group)
 		if err != nil {
 			return nil, fmt.Errorf("generate: %w", err)
 		}
@@ -149,31 +159,18 @@ type findingsResponse struct {
 	} `json:"findings"`
 }
 
-// batch makes one structured-output Generate request for group (at most
-// BatchCap candidates) and returns their assembled Findings — the live
-// half of Answer.
-func batch(ctx context.Context, ollama *api.Client, group []Candidate) ([]Finding, error) {
+// batch makes one structured-output request for group (at most BatchCap
+// candidates) via provider and returns their assembled Findings — the
+// live half of Answer.
+func batch(ctx context.Context, provider Provider, group []Candidate) ([]Finding, error) {
 	ids := make([]string, len(group))
 	for i, c := range group {
 		ids[i] = candidateID(c)
 	}
 
-	stream := false
-	req := &api.GenerateRequest{
-		Model:  Model,
-		System: systemPrompt,
-		Prompt: buildPrompt(group),
-		Format: buildSchema(ids),
-		Stream: &stream,
-	}
-
-	var responseText string
-	err := ollama.Generate(ctx, req, func(resp api.GenerateResponse) error {
-		responseText = resp.Response
-		return nil
-	})
+	responseText, err := provider.Batch(ctx, systemPrompt, buildPrompt(group), buildSchema(ids))
 	if err != nil {
-		return nil, fmt.Errorf("ollama generate: %w", err)
+		return nil, fmt.Errorf("provider batch: %w", err)
 	}
 
 	var parsed findingsResponse

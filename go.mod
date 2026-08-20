@@ -3,9 +3,11 @@ module ph-contract-loophole-detector
 go 1.26.4
 
 require (
+	github.com/anthropics/anthropic-sdk-go v1.66.0
 	github.com/blevesearch/bleve/v2 v2.6.0
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/google/uuid v1.6.0
+	github.com/joho/godotenv v1.5.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	github.com/ollama/ollama v0.32.15
 	github.com/qdrant/go-client v1.19.0
@@ -33,17 +35,26 @@ require (
 	github.com/blevesearch/zapx/v15 v15.4.3 // indirect
 	github.com/blevesearch/zapx/v16 v16.3.4 // indirect
 	github.com/blevesearch/zapx/v17 v17.1.2 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
+	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
+	github.com/standard-webhooks/standard-webhooks/libraries v0.0.1 // indirect
+	github.com/tidwall/gjson v1.18.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect

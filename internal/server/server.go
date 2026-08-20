@@ -64,8 +64,15 @@ const requestTimeout = 15 * time.Minute
 // touch these — see the tests, which pass nil deps to prove it.
 type Deps struct {
 	Ollama *api.Client
-	Qdrant *store.QdrantStore
-	Bleve  *store.BleveStore
+	// Generator answers generate.Answer's structured-output findings
+	// call — either generate.OllamaProvider (local, default) or
+	// generate.ClaudeProvider (remote), chosen by cmd/server's
+	// -llm-provider flag. Kept separate from Ollama above: Ollama stays
+	// the query-embedding client (retrieve.Query) no matter which
+	// provider answers generation.
+	Generator generate.Provider
+	Qdrant    *store.QdrantStore
+	Bleve     *store.BleveStore
 }
 
 // NewRouter wires the one primary-flow route plus a health check.
@@ -199,7 +206,7 @@ func (d Deps) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	generated, err := generate.Answer(ctx, d.Ollama, candidates)
+	generated, err := generate.Answer(ctx, d.Generator, candidates)
 	if err != nil {
 		log.Printf("server: generate.Answer: %v", err)
 		writeError(w, http.StatusInternalServerError, "internal error")

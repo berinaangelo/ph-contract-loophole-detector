@@ -1,0 +1,23 @@
+#!/bin/sh
+# Blocks a commit that adds anything that looks like a live Anthropic API
+# key. This repo never hardcodes ANTHROPIC_API_KEY (cmd/server/main.go
+# reads it via anthropic.NewClient()'s own env resolution) — this hook is
+# just a backstop against pasting a real key into a doc/example/script by
+# mistake. Enable once per clone: git config core.hooksPath .githooks
+
+# Anthropic API keys look like sk-ant-api03-<long token>. Match only the
+# added side of the staged diff, so removing a key (or the "sk-ant-..."
+# placeholder already in README, which has no real token after it) never
+# trips this.
+pattern='sk-ant-[A-Za-z0-9_-]{20,}'
+
+hits=$(git diff --cached -U0 -- . | grep -E '^[+]' | grep -Ev '^[+]{3} ' | grep -Ei "$pattern")
+
+if [ -n "$hits" ]; then
+	echo "pre-commit: refusing to commit — looks like a live Anthropic API key:" >&2
+	echo "$hits" | sed 's/^/  /' >&2
+	echo "Remove it and use ANTHROPIC_API_KEY (env var only) instead." >&2
+	exit 1
+fi
+
+exit 0

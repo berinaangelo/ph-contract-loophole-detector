@@ -1,12 +1,65 @@
 package generate
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
 	"ph-contract-loophole-detector/internal/store"
 )
+
+// fakeProvider is a test-only Provider — Answer/batch's only live-client
+// dependency is the Provider interface, so a fake here is enough to
+// exercise Answer's chunking and error-propagation without a real Ollama
+// or Claude backend.
+type fakeProvider struct {
+	batchCalls int
+	// err, if set, is returned by every Batch call instead of a response.
+	err error
+}
+
+func (p *fakeProvider) Batch(_ context.Context, _, _ string, schema json.RawMessage) (string, error) {
+	p.batchCalls++
+	if p.err != nil {
+		return "", p.err
+	}
+
+	// Echo back a well-formed line for every id in the schema's enum, so
+	// callers can assert on batch count without hand-writing responses.
+	var s struct {
+		Properties struct {
+			Findings struct {
+				Items struct {
+					Properties struct {
+						ID struct {
+							Enum []string `json:"enum"`
+						} `json:"id"`
+					} `json:"properties"`
+				} `json:"items"`
+			} `json:"findings"`
+		} `json:"properties"`
+	}
+	if err := json.Unmarshal(schema, &s); err != nil {
+		return "", fmt.Errorf("fakeProvider: decode schema: %w", err)
+	}
+
+	resp := findingsResponse{}
+	for _, id := range s.Properties.Findings.Items.Properties.ID.Enum {
+		resp.Findings = append(resp.Findings, struct {
+			ID          string `json:"id"`
+			Explanation string `json:"explanation"`
+			Action      string `json:"action"`
+		}{ID: id, Explanation: "exp", Action: "act"})
+	}
+	raw, err := json.Marshal(resp)
+	if err != nil {
+		return "", err
+	}
+	return string(raw), nil
+}
 
 func TestCandidateID_KeysByClauseAndIssue(t *testing.T) {
 	a := Candidate{ClauseIndex: 3, Issue: "termination_notice"}
@@ -149,6 +202,50 @@ func TestBuildPrompt_IncludesClauseTextAndCitation(t *testing.T) {
 		if !strings.Contains(prompt, want) {
 			t.Errorf("prompt missing %q; got: %s", want, prompt)
 		}
+	}
+}
+
+func TestAnswer_EmptyCandidatesSkipsProvider(t *testing.T) {
+	p := &fakeProvider{}
+	got, err := Answer(context.Background(), p, nil)
+	if err != nil {
+		t.Fatalf("Answer() error = %v, want nil", err)
+	}
+	if got != nil {
+		t.Errorf("Answer() = %v, want nil", got)
+	}
+	if p.batchCalls != 0 {
+		t.Errorf("batchCalls = %d, want 0 (provider should never be called for zero candidates)", p.batchCalls)
+	}
+}
+
+func TestAnswer_ChunksAcrossMultipleBatchCalls(t *testing.T) {
+	candidates := make([]Candidate, BatchCap*2+3) // spans 3 batches: cap, cap, 3
+	for i := range candidates {
+		candidates[i] = Candidate{ClauseIndex: i, Issue: "issue"}
+	}
+
+	p := &fakeProvider{}
+	got, err := Answer(context.Background(), p, candidates)
+	if err != nil {
+		t.Fatalf("Answer() error = %v, want nil", err)
+	}
+	if p.batchCalls != 3 {
+		t.Errorf("batchCalls = %d, want 3", p.batchCalls)
+	}
+	if len(got) != len(candidates) {
+		t.Errorf("got %d findings, want %d (one per candidate across all batches)", len(got), len(candidates))
+	}
+}
+
+func TestAnswer_PropagatesProviderError(t *testing.T) {
+	wantErr := errors.New("boom")
+	p := &fakeProvider{err: wantErr}
+	candidates := []Candidate{{ClauseIndex: 1, Issue: "issue"}}
+
+	_, err := Answer(context.Background(), p, candidates)
+	if err == nil || !errors.Is(err, wantErr) {
+		t.Fatalf("Answer() error = %v, want it to wrap %v", err, wantErr)
 	}
 }
 
